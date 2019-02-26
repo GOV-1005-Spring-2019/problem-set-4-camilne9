@@ -46,12 +46,13 @@ The first `response` of Dem came `r data %>%
 ```{r, table, echo = FALSE}
 x <-data %>% 
   select(response, race_eth, final_weight) %>% 
+  filter(race_eth != "[DO NOT READ] Don't know/Refused") %>% 
+  mutate(race_eth = fct_relevel(race_eth, c("White", "Black", "Hispanic", "Asian", "Other"))) %>%
   group_by(response, race_eth) %>%
-  summarize(total = sum(final_weight)) 
+  summarize(total = sum(final_weight))
 
 y <-x %>% 
-  filter(race_eth != "[DO NOT READ] Don't know/Refused") %>% 
-  spread(key = response, value = total, fill = 0) %>%  
+  spread(key = response, value = total, fill = 0) %>% 
   mutate(all = Dem + Rep + Und + `3`) %>% 
   mutate(DEM = Dem/all) %>% 
   mutate(REP = Rep/all) %>% 
@@ -60,7 +61,8 @@ y <-x %>%
 
 gt(y) %>% 
   tab_header(
-    title = "North Carolina 9th District: Voter breakdown by Race and Party") %>% 
+    title = "North Carolina 9th District: Voter Preference by Race") %>% 
+  tab_source_note("New York Times Upshot/Siena College 2018 live polls") %>% 
   
   cols_label(
     race_eth = "",
@@ -69,7 +71,8 @@ gt(y) %>%
     UND = "UND."
 ) %>% 
   fmt_percent(columns = vars(DEM, REP, UND),
-                decimals = 0)
+                decimals = 0) %>% 
+  na_if(0)
   
 ```
 
