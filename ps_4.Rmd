@@ -33,17 +33,17 @@ There are `r data %>%
   filter(race_eth == "White", file_race_black != "White") %>% 
 summarize(n())` respondents listed as “White” under `race_eth` who are not listed as “White” under `file_race_black`.
 
-The first `response` of Rep came `r data %>%
+The first `response` of Dem came `r data %>%
   filter(response %in% c("Dem", "Rep")) %>%
   group_by(response) %>% 
   select(response, timestamp) %>% 
   summarize(min_time = min(timestamp)) %>% 
-  summarize(time_diff = round(min_time[1]-min_time[2], digits=0))` minutes (rounded to the nearest minute) before the first `response` of Dem.
+  summarize(time_diff = round(min_time[2]-min_time[1], digits=0))` minutes (rounded to the nearest minute) before the first `response` of Rep.
 
 
 
 # Question 2
-```{r, table, echo = FALSE, eval = FALSE}
+```{r, table, echo = FALSE}
 x <-data %>% 
   select(response, race_eth, final_weight) %>% 
   group_by(response, race_eth) %>%
@@ -51,42 +51,44 @@ x <-data %>%
 
 y <-x %>% 
   filter(race_eth != "[DO NOT READ] Don't know/Refused") %>% 
-  spread(key = response, value = total) %>% 
-  mutate(all = Dem + Rep + Und) %>% 
+  spread(key = response, value = total, fill = 0) %>%  
+  mutate(all = Dem + Rep + Und + `3`) %>% 
   mutate(DEM = Dem/all) %>% 
   mutate(REP = Rep/all) %>% 
   mutate(UND = Und/all) %>% 
   select(race_eth, DEM:UND)
-y
+
 gt(y) %>% 
   tab_header(
-    title = "NC 9th Voter breakdown by Race and Party") %>% 
+    title = "North Carolina 9th District: Voter breakdown by Race and Party") %>% 
   
   cols_label(
-    race_eth = "Race",
+    race_eth = "",
     DEM = "DEM.",
     REP = "REP.",
     UND = "UND."
-  ) %>%
-  
+) %>% 
   fmt_percent(columns = vars(DEM, REP, UND),
-              decimals = 0) %>% 
-  as_raw_html() %>% as.character() %>% cat()
+                decimals = 0)
+  
 ```
 
 # Question 3
 ```{r, NC Graph, echo = FALSE}
 x <- data %>% 
   select(response, educ, final_weight) %>% 
-  group_by(educ) %>% 
   filter(educ != "[DO NOT READ] Refused")
 x %>% 
-  ggplot(aes(y = final_weight, x = educ))+geom_violin()+geom_jitter()+coord_flip()+
+  mutate(educ = fct_relevel(educ, c("Grade school", "High school", "Some college or trade school",
+                                    "Bachelors' degree", "Graduate or Professional Degree"))) %>% 
+  group_by(educ) %>% 
+  ggplot(aes(y = final_weight, x = educ))+geom_violin()+
+  geom_jitter(alpha = .4, width= .2)+coord_flip()+
   labs(title = "More Educated Matter Less in North Carolina 9th",
        subtitle = "Poll gives more weight to people who are less likely to participate in polls",
-       x= "Weight Given to Respondent in Calculating Poll Results",
-       y = NULL,
-       source = "New York Times Upshot/Siena College 2018 live polls")
+       y= "Weight Given to Respondent in Calculating Poll Results",
+       x = NULL,
+       caption = "New York Times Upshot/Siena College 2018 live polls")
 ```
 
 # Question 4
