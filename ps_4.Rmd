@@ -12,33 +12,50 @@ library(readr)
 library(ggplot2)
 library(gt)
 library(devtools)
-
+#These commands load the necessary packages.
 data <- read_csv("ps_4_elections-poll-nc09-3.csv", 
                  col_types = cols(timestamp = col_datetime(format = "")))
+#The data frame is loaded in and named, with the timestamp variable interpreted as a datetime so it is easier to work with later.
 ```
 # Question 1
-There were `r data %>% filter(response == "Dem") %>% summarize(n())` respondents who supported the Democratic candidate.
+There were 
+`r data %>% filter(response == "Dem") %>% summarize(n())
+#this code filters to only look for people who favored democrats and then outputs the number of such entries` 
+respondents who supported the Democratic candidate.
 
 There were `r data %>% 
   group_by(response) %>% 
   filter(response %in% c("Rep", "Und")) %>% 
+#These commands group the polled people by what party they favored and isolates only the people who favored the republican or were undecided.
   summarize(party_count = n()) %>% 
-  summarize(diff = party_count[1]-party_count[2])` more respondents who favored the Republican candidate than who were Undecided.
+#This counts the number of people that fell in each of these groups.
+  summarize(diff = party_count[1]-party_count[2])
+#This outputs the difference between the first and second rows of party_count, which means it output the difference between the number of people who favored republicans and the number of undecided people.` 
+  more respondents who favored the Republican candidate than who were Undecided.
 
 There are two gender variables (`gender` and `gender_combined`). There are `r data %>% 
   filter(gender != gender_combined) %>% 
-  summarize(n())` individuals for whom these variables have different values.
+  summarize(n())
+#This filters for only cases where the two gender variables were unequal and outputs the number of such observations.`
+  individuals for whom these variables have different values.
 
 There are `r data %>% 
   filter(race_eth == "White", file_race_black != "White") %>% 
-summarize(n())` respondents listed as “White” under `race_eth` who are not listed as “White” under `file_race_black`.
+summarize(n())
+#This filters for entries where in one category a person is denoted as white and in another category the person is not denoted as white and outputs the number of such cases.` 
+respondents listed as “White” under `race_eth` who are not listed as “White” under `file_race_black`.
 
 The first `response` of Dem came `r data %>%
   filter(response %in% c("Dem", "Rep")) %>%
   group_by(response) %>% 
+#The above commands isolate the party preference of interests and groups people my their response.
   select(response, timestamp) %>% 
+#This selects only the necessary variables.
   summarize(min_time = min(timestamp)) %>% 
-  summarize(time_diff = round(min_time[2]-min_time[1], digits=0))` minutes (rounded to the nearest minute) before the first `response` of Rep.
+#Since timestamp is a datetime, the minimum in each grouped category (response) is found and named.
+  summarize(time_diff = round(min_time[2]-min_time[1], digits=0))
+#The difference is found between the minimum time of response for a republican (second row) and the minimum time of repsonse for a democrat (first row).` 
+  minutes (rounded to the nearest minute) before the first `response` of Rep.
 
 
 
@@ -66,13 +83,14 @@ gt(y) %>%
   
   cols_label(
     race_eth = "",
-    DEM = "DEM.",
-    REP = "REP.",
-    UND = "UND."
+    DEM = "Democrat",
+    REP = "Republican",
+    UND = "Undecided"
 ) %>% 
   fmt_percent(columns = vars(DEM, REP, UND),
                 decimals = 0) %>% 
-  na_if(0)
+  na_if(0) %>% 
+  fmt_missing(columns = vars(UND), rows =4)
   
 ```
 
@@ -86,7 +104,7 @@ x %>%
                                     "Bachelors' degree", "Graduate or Professional Degree"))) %>% 
   group_by(educ) %>% 
   ggplot(aes(y = final_weight, x = educ))+geom_violin()+
-  geom_jitter(alpha = .4, width= .2)+coord_flip()+
+  geom_jitter(alpha = .4, width= .2, size = .95)+coord_flip()+
   labs(title = "More Educated Matter Less in North Carolina 9th",
        subtitle = "Poll gives more weight to people who are less likely to participate in polls",
        y= "Weight Given to Respondent in Calculating Poll Results",
