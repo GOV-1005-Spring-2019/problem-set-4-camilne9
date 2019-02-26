@@ -60,7 +60,7 @@ The first `response` of Dem came `r data %>%
 
 
 # Question 2
-```{r, table, echo = FALSE}
+```{r, table by race, echo = FALSE}
 x <-data %>% 
   select(response, race_eth, final_weight) %>% 
 #Only the needed variable are considered for simplicity
@@ -107,7 +107,7 @@ gt(y) %>%
 ```
 
 # Question 3
-```{r, NC Graph, echo = FALSE}
+```{r, North Carolina Polling Graph, echo = FALSE}
 x <- data %>% 
   select(response, educ, final_weight) %>% 
 #The relevant variables are isolated for simplicity
@@ -136,25 +136,37 @@ x %>%
 ```
 
 # Question 4
-```{r echo = FALSE}
+```{r, voting preference by party, echo = FALSE}
 z <- data %>% 
   filter(likely != "[DO NOT READ] Don't know/Refused") %>% 
   mutate(likely = fct_relevel(likely, c( "Not at all likely","Not very likely",
                                         "Somewhat likely", "Very likely",
                                         "Almost certain", "Already voted"))) %>% 
+#The likely variable is adjusted to exclude cases where it is unknown and it is releveled so that the variable can later be applied in the graph meaningfully and having a logical order.
   group_by(partyid, response, likely) %>% 
+#This grouping explores the combination of the three variables of interest.
   select(partyid, response, likely, final_weight) %>% 
+#The relevant variables are isolated for simplicity. The final weight variable is necessary so that poll counts can reflect more accurately the necessary ajustments due to sampling error.
   filter(partyid %in% c("Democrat", "Republican", "Independent (No party)")) %>% 
+#For clarity only the most common party identification categories are used. Other groups would be too small in comparison to be particularly illuminating.
   filter(response %in% c("Dem", "Rep")) %>% 
+#Similar to the filter on partyid, the above filter is used because only the most popular responses are frequent enough to provide useful information.
   summarize(total = sum(final_weight))
+#A variable is defined to reflect not just the number of people who fit a particular category, but also the weight of these people based on the response limitations of polling.
 
 z %>% 
-  ggplot(aes(x= response, y = total, fill = likely))+facet_wrap("partyid")+geom_col()+
+  ggplot(aes(x= response, y = total, fill = likely))+
+#A plot is created with response as the independent variable, the weighted voting power as the dependent variable, and likelihood of the voter actually voting as they say indicated by the fill color.
+  facet_wrap("partyid")+
+#The graph will have three sections, one for each major party (or lack thereof).
+  geom_col()+
+#This geom uses the fact that the independent variable is categorical and the dependent variable is numerical. (It also allows fill.)
   labs(title = "Voting Preference by Party Identification in North Carolina's 9th District",
        subtitle = "Likelihood of Vote Matching Response is Considered",
        x = "Voting Preference",
        y = "Weighted Voting Power",
        caption = "Source: New York Times Upshot/Siena College 2018 live polls")
+#Titles are added to clarify what variables are shown where and where the data comes from.
 ```
 
 # Colleagues
