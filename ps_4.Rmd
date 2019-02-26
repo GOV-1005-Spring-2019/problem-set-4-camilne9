@@ -136,6 +136,26 @@ x %>%
 ```
 
 # Question 4
+```{r echo = FALSE}
+z <- data %>% 
+  filter(likely != "[DO NOT READ] Don't know/Refused") %>% 
+  mutate(likely = fct_relevel(likely, c( "Not at all likely","Not very likely",
+                                        "Somewhat likely", "Very likely",
+                                        "Almost certain", "Already voted"))) %>% 
+  group_by(partyid, response, likely) %>% 
+  select(partyid, response, likely, final_weight) %>% 
+  filter(partyid %in% c("Democrat", "Republican", "Independent (No party)")) %>% 
+  filter(response %in% c("Dem", "Rep")) %>% 
+  summarize(total = sum(final_weight))
+
+z %>% 
+  ggplot(aes(x= response, y = total, fill = likely))+facet_wrap("partyid")+geom_col()+
+  labs(title = "Voting Preference by Party Identification in North Carolina's 9th District",
+       subtitle = "Likelihood of Vote Matching Response is Considered",
+       x = "Voting Preference",
+       y = "Weighted Voting Power",
+       caption = "Source: New York Times Upshot/Siena College 2018 live polls")
+```
 
 # Colleagues
 April C, Chris O, Diego M, Shafi R, Debi G, Beau M
