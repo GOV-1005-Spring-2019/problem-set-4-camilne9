@@ -110,18 +110,32 @@ gt(y) %>%
 ```{r, NC Graph, echo = FALSE}
 x <- data %>% 
   select(response, educ, final_weight) %>% 
+#The relevant variables are isolated for simplicity
   filter(educ != "[DO NOT READ] Refused")
+#People whose education is unknown are removed.
 x %>% 
   mutate(educ = fct_relevel(educ, c("Grade school", "High school", "Some college or trade school",
                                     "Bachelors' degree", "Graduate or Professional Degree"))) %>% 
+#The education variable, a factor, is releveled so that when it is graphed later the different possibilities appear in the desired order.
   group_by(educ) %>% 
-  ggplot(aes(y = final_weight, x = educ))+geom_violin()+
-  geom_jitter(alpha = .4, width= .2, size = .95)+coord_flip()+
+#The data is grouped by education level.
+  ggplot(aes(y = final_weight, x = educ)) +
+#A plot is created with the education categories on the x axis and the weight on the y axis. This is opposite of what is ultimately desired so that the continuous variable is put on the y axis.
+  geom_violin() +
+#The violin plot shows the frequency of different weights for each education category. It is put before the jitter plot so the points of the jitter go on top of the violin.
+  geom_jitter(alpha = .4, width= .2, size = .95)+
+#The points of the jitter plot are made lighter, restricted to closer to the center of the violin and made slightly smaller to better match the model plot.  
+  coord_flip()+
+#The axes are fliped to match the desired plot.
   labs(title = "More Educated Matter Less in North Carolina 9th",
        subtitle = "Poll gives more weight to people who are less likely to participate in polls",
        y= "Weight Given to Respondent in Calculating Poll Results",
        x = NULL,
        caption = "New York Times Upshot/Siena College 2018 live polls")
+#Title, subtitle, axis titles, and a caption are added to math the desired plot. The axis labels reflect the fact that a coordinate flip was performed.
 ```
 
 # Question 4
+
+# Colleagues
+April C, Chris O, Diego M, Shafi R, Debi G, Beau M
