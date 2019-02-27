@@ -139,13 +139,13 @@ x %>%
 ```{r, voting preference by party, echo = FALSE}
 z <- data %>% 
   filter(likely != "[DO NOT READ] Don't know/Refused") %>% 
-  mutate(likely = fct_relevel(likely, c( "Not at all likely","Not very likely",
+  mutate(Likelihood = fct_relevel(likely, c( "Not at all likely","Not very likely",
                                         "Somewhat likely", "Very likely",
                                         "Almost certain", "Already voted"))) %>% 
-#The likely variable is adjusted to exclude cases where it is unknown and it is releveled so that the variable can later be applied in the graph meaningfully and having a logical order.
-  group_by(partyid, response, likely) %>% 
+#The likely variable is adjusted to exclude cases where it is unknown and it is releveled so that the variable can later be applied in the graph meaningfully and having a logical order. It is renamed Likelihood for clarity when it is used in the graph later.
+  group_by(partyid, response, Likelihood) %>% 
 #This grouping explores the combination of the three variables of interest.
-  select(partyid, response, likely, final_weight) %>% 
+  select(partyid, response, Likelihood, final_weight) %>% 
 #The relevant variables are isolated for simplicity. The final weight variable is necessary so that poll counts can reflect more accurately the necessary ajustments due to sampling error.
   filter(partyid %in% c("Democrat", "Republican", "Independent (No party)")) %>% 
 #For clarity only the most common party identification categories are used. Other groups would be too small in comparison to be particularly illuminating.
@@ -155,7 +155,7 @@ z <- data %>%
 #A variable is defined to reflect not just the number of people who fit a particular category, but also the weight of these people based on the response limitations of polling.
 
 z %>% 
-  ggplot(aes(x= response, y = total, fill = likely))+
+  ggplot(aes(x= response, y = total, fill = Likelihood))+
 #A plot is created with response as the independent variable, the weighted voting power as the dependent variable, and likelihood of the voter actually voting as they say indicated by the fill color.
   facet_wrap("partyid")+
 #The graph will have three sections, one for each major party (or lack thereof).
@@ -165,8 +165,11 @@ z %>%
        subtitle = "Likelihood of Vote Matching Response is Considered",
        x = "Voting Preference",
        y = "Weighted Voting Power",
-       caption = "Source: New York Times Upshot/Siena College 2018 live polls")
+       caption = "Source: New York Times Upshot/Siena College 2018 live polls")+
 #Titles are added to clarify what variables are shown where and where the data comes from.
+  theme_bw()+
+  theme(panel.grid.major.x = element_blank())
+#These commands make the graph look better aestetically. The background is made to be white and the verticle lines (which contribute nothing to the graph's readability) are removed.
 ```
 
 # Colleagues
